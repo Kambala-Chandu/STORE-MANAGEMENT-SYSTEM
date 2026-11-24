@@ -1,0 +1,12 @@
+export { Customer360View } from './Customer360View';
+export { LeadManagementView } from './LeadManagementView';
+export { OpportunityPipelineView } from './OpportunityPipelineView';
+export { ContactManagementView } from './ContactManagementView';
+export { SalesActivitiesView } from './SalesActivitiesView';
+export { CustomerSupportView } from './CustomerSupportView';
+export { MarketingCampaignsView } from './MarketingCampaignsView';
+export { LoyaltyProgramView } from './LoyaltyProgramView';
+export { CRMAnalyticsDashboard } from './CRMAnalyticsDashboard';
+export { CommunicationCenterView } from './CommunicationCenterView';
+export { CRMKPIGrid } from './CRMKPIGrid';
+export { CRMExportModal } from './CRMExportModal';

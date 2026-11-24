@@ -1,0 +1,13 @@
+export { EmployeeManagementView } from './EmployeeManagementView';
+export { OrgStructureView } from './OrgStructureView';
+export { AttendanceManagementView } from './AttendanceManagementView';
+export { LeaveManagementView } from './LeaveManagementView';
+export { PayrollManagementView } from './PayrollManagementView';
+export { RecruitmentModuleView } from './RecruitmentModuleView';
+export { EmployeePerformanceView } from './EmployeePerformanceView';
+export { EmployeeSelfServiceView } from './EmployeeSelfServiceView';
+export { HRAnalyticsDashboard } from './HRAnalyticsDashboard';
+export { DocumentManagementView } from './DocumentManagementView';
+export { HRNotificationsView } from './HRNotificationsView';
+export { HRKPIGrid } from './HRKPIGrid';
+export { HRExportModal } from './HRExportModal';
