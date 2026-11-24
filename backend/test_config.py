@@ -12,6 +12,8 @@ TEST_ENVIRONMENT = {
     "DB_NAME": "isolated_unit_tests",
     "DB_USER": "isolated_test_user",
     "DB_PASSWORD": "isolated-test-database-password",
+    "DB_SSL_ENABLED": "False",
+    "DB_SSL_CA": "",
     "SECRET_KEY": "isolated-test-jwt-secret-with-at-least-32-characters",
     "CORS_ORIGINS": "http://127.0.0.1:5173",
     "SEED_DEMO_DATA": "False",
