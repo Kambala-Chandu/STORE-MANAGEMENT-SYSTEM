@@ -1,0 +1,1 @@
+export const VendorKPIGrid = ({ kpis }) => (<div className='grid grid-cols-4 gap-4'>{kpis?.map((k,i)=><div key={i} className='bg-[#0B1329] border border-white/10 p-4 text-white rounded shadow-primary/20'>{k.label}: {k.value}</div>)}</div>);
