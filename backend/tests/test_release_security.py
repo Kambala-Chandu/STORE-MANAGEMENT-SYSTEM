@@ -40,6 +40,7 @@ class ProductionConfigurationTests(unittest.TestCase):
             "DB_NAME": "store",
             "DB_USER": "store_app",
             "DB_PASSWORD": "private-database-password",
+            "DB_SSL_ENABLED": "True",
             "CORS_ORIGINS": "https://store.example.com",
         }
         values.update(overrides)
@@ -56,6 +57,7 @@ class ProductionConfigurationTests(unittest.TestCase):
             {"SECRET_KEY": "placeholder"},
             {"DB_PASSWORD": ""},
             {"DB_PASSWORD": "placeholder"},
+            {"DB_SSL_ENABLED": "False"},
             {"DEBUG": "True"},
             {"CORS_ORIGINS": "*"},
         ):

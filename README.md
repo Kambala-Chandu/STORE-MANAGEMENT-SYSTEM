@@ -146,6 +146,78 @@ Do not run `alembic stamp` blindly. Stamping records a migration version without
 
 For a fresh empty database, skip stamping and run only `python -m alembic upgrade head`.
 
+### Zero-cost public demonstration deployment
+
+This is a demonstration configuration, not a production-readiness claim. Render Free can sleep, has an ephemeral local filesystem, and provides no free interactive shell or pre-deploy job. Enzonic Free can also sleep and has limited backup retention.
+
+#### Backend — Render Free Web Service
+
+- Repository branch: `main`
+- Root directory: `backend`
+- Runtime: Python 3
+- Python version: read from `backend/.python-version` (`3.13.14`)
+- Build command: `pip install -r requirements.txt`
+- Start command: `python -m uvicorn main:app --host 0.0.0.0 --port $PORT`
+- Health check path: `/health/live`
+- Plan: Free; do not add a payment method for this demonstration
+
+Configure these Render environment variables in its secret/environment settings, never in Git:
+
+```text
+ENVIRONMENT=production
+DEBUG=False
+SEED_DEMO_DATA=False
+ENABLE_PUBLIC_REGISTRATION=False
+ENABLE_PROTOTYPE_ROUTERS=False
+DB_HOST=<Enzonic MySQL hostname>
+DB_PORT=3306
+DB_NAME=<hosted database name>
+DB_USER=<hosted database user>
+DB_PASSWORD=<hosted database password>
+DB_SSL_ENABLED=True
+DB_SSL_CA=<optional provider CA-bundle path; otherwise leave empty>
+SECRET_KEY=<private random value of at least 32 characters>
+CORS_ORIGINS=https://<Cloudflare Pages project>.pages.dev
+```
+
+TLS never uses an insecure verification mode. When `DB_SSL_CA` is empty, the application uses Certifi's trusted CA bundle. If Enzonic supplies a private/provider CA file, make that file available as a Render secret file and set `DB_SSL_CA` to its absolute path. The application, Alembic, readiness check, and first-Admin command all use the same verified connection factory. Production configuration refuses to start with database TLS disabled.
+
+#### Frontend — Cloudflare Pages
+
+- Repository branch: `main`
+- Root directory: `frontend`
+- Framework preset: Vite
+- Build command: `npm ci && npm run build`
+- Build output directory: `dist`
+- Build environment variable: `VITE_API_BASE_URL=https://<Render service>.onrender.com/api/v1`
+
+Do not add a `_redirects` file for the current static Pages deployment. Cloudflare Pages automatically treats a deployment with `index.html` and no top-level `404.html` as a single-page application, serving the root document for unmatched navigation paths.
+
+#### Initialize a NEW empty hosted database
+
+Render Free does not provide free shell access or pre-deploy commands. From a trusted local checkout of the same release, create a temporary local environment containing only the new hosted database configuration listed above. Do not point these commands at an existing database and do not place credentials on the command line or in Git.
+
+1. Confirm the target database is the newly created, empty Enzonic database.
+2. From `backend`, apply all migrations:
+   ```powershell
+   python -m alembic upgrade head
+   python -m alembic check
+   ```
+3. Create the first Admin. Password entry is hidden, and the command refuses to run if an Admin already exists:
+   ```powershell
+   python -m app.bootstrap_admin --full-name "Store Administrator" --username store_admin --email admin@example.com
+   ```
+4. Remove the temporary local hosted-database configuration after initialization.
+5. Deploy the backend, verify `/health/live` and `/health/ready`, then deploy the frontend and test authentication and role-protected workflows.
+
+#### File persistence limitations
+
+- Core products, purchases, sales, invoices, inventory movements, users, and audit logs persist in MySQL.
+- Invoice PDFs, report CSVs, barcode files, and JSON exports are generated in the browser and downloaded to the user's device; the backend does not retain them.
+- Prototype document/image upload controls and enterprise modules are excluded from the deployed application by default. Their current upload services are simulated or browser-local and do not persist uploaded files to Render or MySQL.
+- Several excluded prototype modules use browser `localStorage`. That data is device/browser-specific, is not shared between users, and is not a server-side backup.
+- Render Free's local filesystem is ephemeral. No feature should rely on files written there surviving a restart, redeploy, or sleep cycle.
+
 ### Purchase retry protection
 
 Purchase creation accepts an optional `Idempotency-Key` request header. The key is scoped to the authenticated user and the purchase-create operation:
@@ -197,9 +269,9 @@ npm run build
 
 Latest release-batch verification (2026-11-22):
 
-- Combined backend suite: `Ran 56 tests in 47.585s` — `OK`.
+- Combined backend suite: `Ran 60 tests in 35.044s` — `OK`.
 - Fresh migration/model comparison: `No new upgrade operations detected`.
-- Frontend production build: 2,404 modules transformed, completed in 25.53 seconds.
+- Frontend production build: 2,404 modules transformed, completed in 20.02 seconds in an isolated copy created from `package-lock.json`.
 - Isolated MySQL 8.4.9 integration suite: `Ran 8 tests in 26.936s` — `OK`. This used the server-default transaction isolation, a separately initialized temporary server, nonstandard loopback port, generated credentials, and disposable database; it did not connect to the normal MySQL service.
 
 ### Opt-in disposable MySQL integration tests

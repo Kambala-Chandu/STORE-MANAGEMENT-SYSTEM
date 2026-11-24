@@ -41,6 +41,8 @@ class Settings:
         self.DB_NAME = get("DB_NAME", "").strip()
         self.DB_USER = get("DB_USER", "").strip()
         self.DB_PASSWORD = get("DB_PASSWORD", "")
+        self.DB_SSL_ENABLED = _as_bool(get("DB_SSL_ENABLED", "False"))
+        self.DB_SSL_CA = get("DB_SSL_CA", "").strip()
 
         self.SECRET_KEY = get("SECRET_KEY", "")
         self.ALGORITHM = get("ALGORITHM", "HS256")
@@ -67,6 +69,8 @@ class Settings:
                 errors.append(f"{name} is required")
         if _looks_like_placeholder(self.DB_PASSWORD) or len(self.DB_PASSWORD) < 8:
             errors.append("DB_PASSWORD is required and must not be a placeholder or weak value")
+        if self.is_production and not self.DB_SSL_ENABLED:
+            errors.append("DB_SSL_ENABLED must be enabled in production")
         if "*" in self.CORS_ORIGINS:
             errors.append("CORS_ORIGINS cannot contain '*' when credentials are enabled")
         if not self.CORS_ORIGINS:
