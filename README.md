@@ -198,17 +198,18 @@ Do not add a `_redirects` file for the current static Pages deployment. Cloudfla
 Render Free does not provide free shell access or pre-deploy commands. From a trusted local checkout of the same release, create a temporary local environment containing only the new hosted database configuration listed above. Do not point these commands at an existing database and do not place credentials on the command line or in Git.
 
 1. Confirm the target database is the newly created, empty Enzonic database.
-2. From `backend`, apply all migrations:
-   ```powershell
-   python -m alembic upgrade head
-   python -m alembic check
+2. In Windows CMD, enter the release backend and run the guarded interactive migration helper. It disables dotenv loading, rejects local hosts, checks that the hosted database has no tables or views, displays only the target host/database, and requires an explicit confirmation before applying `upgrade head`:
+   ```cmd
+   cd /d E:\Store-Management-System-release\backend
+   python -m app.db.migrate_new_database
    ```
-3. Create the first Admin. Password entry is hidden, and the command refuses to run if an Admin already exists:
-   ```powershell
-   python -m app.bootstrap_admin --full-name "Store Administrator" --username store_admin --email admin@example.com
+3. Create the first Admin with the guarded hosted wrapper. It verifies that the database is at Alembic head, displays the target, asks for confirmation, and then delegates to the existing first-Admin bootstrap logic:
+   ```cmd
+   cd /d E:\Store-Management-System-release\backend
+   python -m app.db.bootstrap_hosted_admin
    ```
-4. Remove the temporary local hosted-database configuration after initialization.
-5. Deploy the backend, verify `/health/live` and `/health/ready`, then deploy the frontend and test authentication and role-protected workflows.
+   The **database password** is the Enzonic credential used only to connect to MySQL. The separately prompted **Admin password** is the application login password for the new Store Management System Admin. They serve different purposes and should be distinct private values. Neither is written to `.env` or printed by the helper.
+4. Deploy the backend, verify `/health/live` and `/health/ready`, then deploy the frontend and test authentication and role-protected workflows.
 
 #### File persistence limitations
 
